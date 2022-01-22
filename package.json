@@ -1,0 +1,81 @@
+{
+  "name": "plurdle",
+  "version": "1.0.0",
+  "description": "A clone of Wordle",
+  "main": "server.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WoollyOne/plurdle.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/WoollyOne/plurdle/issues"
+  },
+  "bin": "server.js",
+  "pkg": {
+    "assets": [
+      "node_modules/**/*",
+      "src/**/*"
+    ],
+    "targets": [
+      "node14-mac-x64",
+      "node14-win-x64"
+    ]
+  },
+  "homepage": "https://github.com/WoollyOne/plurdle#readme",
+  "dependencies": {
+    "electron-squirrel-startup": "^1.0.0",
+    "express": "^4.17.2",
+    "open": "^8.4.0"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "^6.0.0-beta.63",
+    "@electron-forge/maker-deb": "^6.0.0-beta.63",
+    "@electron-forge/maker-rpm": "^6.0.0-beta.63",
+    "@electron-forge/maker-squirrel": "^6.0.0-beta.63",
+    "@electron-forge/maker-zip": "^6.0.0-beta.63",
+    "electron": "^16.0.7"
+  },
+  "scripts": {
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make-mac": "electron-forge make --platform darwin",
+    "make-win": "npx @electron-forge/cli make",
+    "make": "electron-forge make"
+  },
+  "config": {
+    "forge": {
+      "packagerConfig": {},
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "name": "plurdle",
+            "authors": "WoollyOne",
+            "iconUrl": "https://woolly.one/favicon.ico",
+            "exe": "plurdle.exe"
+          }
+        },
+        {
+          "name": "@electron-forge/maker-zip",
+          "platforms": [
+            "darwin"
+          ]
+        },
+        {
+          "name": "@electron-forge/maker-deb",
+          "config": {}
+        },
+        {
+          "name": "@electron-forge/maker-rpm",
+          "config": {}
+        }
+      ]
+    }
+  }
+}

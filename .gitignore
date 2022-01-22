@@ -1,0 +1,4 @@
+node_modules
+.jshintrc
+out/
+.DS_Store
