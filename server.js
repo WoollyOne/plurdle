@@ -1,24 +1,26 @@
-const { app, BrowserWindow } = require('electron')
+const path = require('path');
+const express = require('express');
+const open = require('open');
+const { env } = require('process');
 
-const createWindow = () => {
-    const win = new BrowserWindow({
-        width: 1000,
-        height: 1000
-    })
+(async function () {
 
-    win.loadFile('src/www/index.html');
-}
+    // create express application
+    const app = express();
 
-app.whenReady().then(() => {
-    createWindow();
+    // find available port (if not 3000)
+    const port = 3000;
+    const host = `http://127.0.0.1:${port}`;
 
-    app.on('activate', () => {
-        if (BrowserWindow.getAllWindows().length === 0) {
-            createWindow()
+    /*-------------------*/
+
+    // endpoint to serve web assets
+    app.use('/web', express.static(path.join(__dirname, './src/www')));
+
+    app.listen(port, async () => {
+        console.log('Plurdle is running properly!');
+        if (process.env.CONTEXT && process.env.CONTEXT === "development") {
+            await open(`${host}/web`); // opens `web/index.html` page
         }
     });
-})
-
-app.on('window-all-closed', () => {
-    app.quit()
-})
+})();
