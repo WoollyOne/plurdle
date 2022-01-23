@@ -15,12 +15,12 @@ const { env } = require('process');
     /*-------------------*/
 
     // endpoint to serve web assets
-    app.use('/web', express.static(path.join(__dirname, './src/www')));
+    app.use('/', express.static(path.join(__dirname, './src/www')));
 
     app.listen(port, async () => {
-        console.log('Plurdle is running properly!');
+        console.log(`Plurdle is running on port ${port}!`);
         if (process.env.CONTEXT && process.env.CONTEXT === "development") {
-            await open(`${host}/web`); // opens `web/index.html` page
+            await open(`${host}/`); // opens `web/index.html` page
         }
     });
 })();

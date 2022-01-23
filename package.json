@@ -33,6 +33,7 @@
     "open": "^8.4.0"
   },
   "scripts": {
-    "start": "node start"
+    "start": "node server.js",
+    "dev": "CONTEXT=development node server.js"
   }
 }
