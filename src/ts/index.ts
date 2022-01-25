@@ -1,10 +1,14 @@
 // Handles dynamic rendering of index.html
 
-import { GameHandler } from "./game.js";
-import { Config } from "./config.js";
-import { decrementDeleteIfZero } from "./util.js";
+import { GameHandler } from "./game";
+import { Config } from "./config";
+import { decrementDeleteIfZero } from "./util";
 
 class IndexComponent {
+
+    public gameHandler: GameHandler = undefined;
+    public uiUpdatesInterval: NodeJS.Timer | null = null;
+
     constructor() {
         this.gameHandler = new GameHandler();
         this.uiUpdatesInterval = null;
@@ -23,7 +27,7 @@ class IndexComponent {
                 return; // Do nothing if the event was already processed
             }
 
-            const element = document.querySelector(`.keyboard-tile[data-key-char="${event.key.toLowerCase()}"`);
+            const element: HTMLElement = document.querySelector(`.keyboard-tile[data-key-char="${event.key.toLowerCase()}"`);
 
             if (element) {
                 element.click();
@@ -52,7 +56,7 @@ class IndexComponent {
             const container = document.createElement('div');
             container.className = "letter-tile-container";
             container.id = "letter-tile-container-" + tryIndex;
-            container.dataset.tryIndex = tryIndex;
+            container.dataset.tryIndex = tryIndex.toString();
             document.querySelector("#letter-tile-containers").appendChild(container);
 
             for (let letterIndex = 0; letterIndex < Config.NUM_LETTERS; letterIndex++) {
@@ -65,7 +69,7 @@ class IndexComponent {
             const container = document.createElement('div');
             container.className = "keyboard-container";
             container.id = "keyboard-container-" + keyboardRowIndex;
-            container.dataset.keyboardRowIndex = keyboardRowIndex;
+            container.dataset.keyboardRowIndex = keyboardRowIndex.toString();
             document.querySelector("#keyboard-containers").appendChild(container);
 
             for (let keyCharIndex = 0; keyCharIndex < Config.KEYBOARD_LAYOUT[keyboardRowIndex].length; keyCharIndex++) {
@@ -77,7 +81,7 @@ class IndexComponent {
         }
     }
 
-    handleClickGuess(event) {
+    handleClickGuess(event: Event) {
         const guessArray = this.getCurrentGuess();
         const currentTry = this.gameHandler.currentTry;
 
@@ -85,44 +89,46 @@ class IndexComponent {
             return;
         }
 
-        const result = this.gameHandler.makeGuess(guessArray, this.gameHandler.currentWord);
+        const result = this.gameHandler.makeGuess(guessArray);
         const matchIndexes = result.matchIndexes;
         const closeMap = result.closeMap;
 
         // Do the coloring of the tiles. The most important part!
         if (matchIndexes && closeMap) {
             const uiUpdatesTiles = [];
-            for (let element of document.querySelectorAll("#letter-tile-container-" + currentTry + " .letter-tile")) {
-                const tileKeyValue = element.firstChild.dataset.value.toLowerCase();
-                const keyboardKey = document.querySelector(`[data-key-char="${tileKeyValue}"]`);
+            for (let element of Array.from(document.querySelectorAll("#letter-tile-container-" + currentTry + " .letter-tile"))) {
+                if (element instanceof HTMLElement && element.firstChild instanceof HTMLElement) {
+                    const tileKeyValue = element.firstChild.dataset.value.toLowerCase();
+                    const keyboardKey = document.querySelector(`[data-key-char="${tileKeyValue}"]`);
 
-                // If it matches, color both the tile and the keyboard key
-                if (matchIndexes.includes(parseInt(element.dataset.letterIndex))) {
-                    uiUpdatesTiles.push(["tile-match", "with-animation"]);
-                    keyboardKey.className = "keyboard-tile tile-match";
-                    continue;
-                }
-
-                const classArray = [...keyboardKey.classList];
-
-                // If it's close, color both the tile and the keyboard key
-                // Handle a case where we get duplicate letter entries by blacklisting it.
-                if (closeMap.has(tileKeyValue)) {
-                    uiUpdatesTiles.push(["tile-close", "with-animation"]);
-
-                    if (!classArray.includes("tile-match")) {
-                        keyboardKey.classList.add("tile-close");
+                    // If it matches, color both the tile and the keyboard key
+                    if (matchIndexes.includes(parseInt(element.dataset.letterIndex))) {
+                        uiUpdatesTiles.push(["tile-match", "with-animation"]);
+                        keyboardKey.className = "keyboard-tile tile-match";
+                        continue;
                     }
 
-                    decrementDeleteIfZero(closeMap, tileKeyValue);
-                    continue;
-                }
+                    const classArray = Array.from(keyboardKey.classList);
 
-                // If it's wrong, color the keyboard key but only if we haven't already determined the key is correct elsewhere
-                if (!classArray.includes("tile-close") && !classArray.includes("tile-match")) {
-                    keyboardKey.classList.add("tile-wrong");
+                    // If it's close, color both the tile and the keyboard key
+                    // Handle a case where we get duplicate letter entries by blacklisting it.
+                    if (closeMap.has(tileKeyValue)) {
+                        uiUpdatesTiles.push(["tile-close", "with-animation"]);
+
+                        if (!classArray.includes("tile-match")) {
+                            keyboardKey.classList.add("tile-close");
+                        }
+
+                        decrementDeleteIfZero(closeMap, tileKeyValue);
+                        continue;
+                    }
+
+                    // If it's wrong, color the keyboard key but only if we haven't already determined the key is correct elsewhere
+                    if (!classArray.includes("tile-close") && !classArray.includes("tile-match")) {
+                        keyboardKey.classList.add("tile-wrong");
+                    }
+                    uiUpdatesTiles.push(["tile-wrong", "with-animation-wrong"]);
                 }
-                uiUpdatesTiles.push(["tile-wrong", "with-animation-wrong"]);
             }
             this.doUIUpdates(uiUpdatesTiles, currentTry);
         } else {
@@ -141,7 +147,7 @@ class IndexComponent {
         }
     }
 
-    handleClickPlayAgain(event) {
+    handleClickPlayAgain(event: Event) {
         if (event.defaultPrevented || this.gameHandler.active) {
             return;
         }
@@ -152,7 +158,7 @@ class IndexComponent {
         event.preventDefault();
     }
 
-    handleEndGame(win) {
+    handleEndGame(win: boolean) {
         setTimeout(() => {
             if (win) {
                 alert("You win :)");
@@ -164,17 +170,17 @@ class IndexComponent {
         }, Config.UI_UPDATE_SPEED * (Config.NUM_LETTERS + 1));
     }
 
-    handleError(error) {
+    handleError(error: string) {
         alert(error);
     }
 
     getCurrentGuess() {
         const currentTry = this.gameHandler.currentTry;
         const currentContainerTiles = Array.from(document.querySelectorAll("#letter-tile-container-" + currentTry + " .letter-tile-text"));
-        return currentContainerTiles.map((element) => element.dataset.value.toLowerCase());
+        return currentContainerTiles.map((element) => element instanceof HTMLElement ? element.dataset.value.toLowerCase() : '');
     }
 
-    handleClickKey(event) {
+    handleClickKey(event: Event) {
         if (event.defaultPrevented || !this.gameHandler.active) {
             return;
         }
@@ -182,6 +188,10 @@ class IndexComponent {
         event.preventDefault();
 
         if (this.uiUpdatesInterval != null) {
+            return;
+        }
+
+        if (!(event.target instanceof HTMLElement)) {
             return;
         }
 
@@ -219,17 +229,17 @@ class IndexComponent {
     }
 
     // Creates a letter tile
-    getTile(tryIndex, letterIndex) {
+    getTile(tryIndex: number, letterIndex: number) {
         const tile = document.createElement('div');
         tile.className = "letter-tile";
-        tile.dataset.tryIndex = tryIndex;
-        tile.dataset.letterIndex = letterIndex;
+        tile.dataset.tryIndex = tryIndex.toString();
+        tile.dataset.letterIndex = letterIndex.toString();
 
         return tile;
     }
 
     // Creates a key tile that will be used for the keyboard
-    getKeyTile(keyChar, isBig) {
+    getKeyTile(keyChar: string, isBig: boolean) {
         const keyTile = document.createElement('div');
         const keySpan = document.createElement('span');
         keySpan.innerHTML = keyChar.toUpperCase();
@@ -250,7 +260,7 @@ class IndexComponent {
         return keyTile;
     }
 
-    doUIUpdates(classes, currentTry) {
+    doUIUpdates(classes: string[][], currentTry: number) {
         let i = 0;
         this.uiUpdatesInterval = setInterval(() => {
             const element = document.querySelector(`#letter-tile-container-${currentTry} .letter-tile[data-letter-index="${i}"]`);

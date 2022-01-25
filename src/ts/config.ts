@@ -1,4 +1,4 @@
-export var Config = {
+export const Config = {
     NUM_LETTERS: 5,
     NUM_TRIES: 6,
     UI_UPDATE_SPEED: 250, // ms

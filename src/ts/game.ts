@@ -1,15 +1,19 @@
 // Handles game logic;
 
-import { gameDict } from "./gamedict.js";
-import { validDict } from "./validdict.js";
-import { incrementSetIfNotPresent } from "./util.js";
+import { gameDict } from "./gamedict";
+import { validDict } from "./validdict";
+import { incrementSetIfNotPresent } from "./util";
 
 export class GameHandler {
     constructor() {
         this.init();
     }
 
-    init() {
+    public currentTry: number = 0;
+    public currentWord: string[] = [];
+    public active: boolean = false;
+
+    public init() {
         const NUM_WORDS = gameDict.length;
         this.currentWord = [];
 
@@ -22,15 +26,16 @@ export class GameHandler {
         this.active = true;
     }
 
-    // guess: array, currentWord: array
+    // guess: array
     // return: object
-    makeGuess(guess, currentWord) {
+    public makeGuess(guess: string[]) {
+        const currentWord = this.currentWord;
         const guessString = guess.join("");
         if (!validDict.includes(guessString)) {
             return { win: false, error: guessString.toUpperCase() + " is not a valid word." };
         }
         else if (guessString === currentWord.join("")) {
-            return { win: true, matchIndexes: [...Array(currentWord.length).keys()], closeMap: new Map() };
+            return { win: true, matchIndexes: Array.from(Array(currentWord.length).keys()), closeMap: new Map() };
         } else {
             // Find all letters where index is the same as the secret word.
             // If we have a match, block it out of the array so we don't accidentally count it twice.
@@ -38,7 +43,7 @@ export class GameHandler {
             // be included that were already found. But since characters can repeat, we should still
             // count it.
             const currentWordCopy = currentWord.slice();
-            const matchIndexes = [];
+            const matchIndexes: number[] = [];
             guess.forEach((char, index) => {
                 const currentWordIndexOf = currentWordCopy.indexOf(char);
                 const doesMatch = currentWordIndexOf === index;
@@ -57,11 +62,5 @@ export class GameHandler {
             this.currentTry += 1;
             return { win: false, matchIndexes: matchIndexes, closeMap: closeMap };
         }
-    }
-
-    doTests() {
-        console.log(makeGuess("TRUES", "TRUES"));
-        console.log(makeGuess("TURNS", "TRUES"));
-        console.log(makeGuess("COINS", "TRUES"));
     }
 }

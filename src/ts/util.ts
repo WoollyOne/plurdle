@@ -1,4 +1,4 @@
-export function incrementSetIfNotPresent(map, key) {
+export function incrementSetIfNotPresent(map: Map<string, number>, key: string) {
     if (map.has(key)) {
         map.set(key, map.get(key) + 1);
     } else {
@@ -6,7 +6,7 @@ export function incrementSetIfNotPresent(map, key) {
     }
 }
 
-export function decrementDeleteIfZero(map, key) {
+export function decrementDeleteIfZero(map: Map<string, number>, key: string) {
     if (map.has(key)) {
         map.set(key, map.get(key) - 1);
     }

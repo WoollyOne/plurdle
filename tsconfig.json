@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "outDir": "./dist",
+        "rootDir": "src",
+        "noImplicitAny": true,
+        "allowJs": true,
+        "target": "es5",
+        "sourceMap": true,
+        "module": "es2022",
+        "moduleResolution": "node"
+    },
+    "include": [
+        "src/ts/**/*"
+    ],
+}
