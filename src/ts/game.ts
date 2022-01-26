@@ -26,8 +26,6 @@ export class GameHandler {
         this.active = true;
     }
 
-    // guess: array
-    // return: object
     public makeGuess(guess: string[]) {
         const currentWord = this.currentWord;
         const guessString = guess.join("");
