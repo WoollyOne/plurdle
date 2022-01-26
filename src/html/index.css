@@ -60,7 +60,7 @@ body {
 .letter-tile-text {
   color: var(--light-0);
   font-weight: bold;
-  font-size: 18pt;
+  font-size: 32pt;
   cursor: default;
 }
 
@@ -111,6 +111,7 @@ body {
 .keyboard-tile-text {
   color: var(--light-0);
   font-weight: bold;
+  font-size: 24pt;
   text-overflow: ellipsis;
   overflow: hidden;
 }
