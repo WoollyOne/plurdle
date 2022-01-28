@@ -3,14 +3,17 @@
 import { GameHandler } from "./game";
 import { Config } from "./config";
 import { decrementDeleteIfZero } from "./util";
+import { SoundPlayer } from "./soundplayer";
 
 class IndexComponent {
 
     public gameHandler: GameHandler = undefined;
+    public soundPlayer: SoundPlayer = undefined;
     public uiUpdatesInterval: NodeJS.Timer | null = null;
 
     constructor() {
         this.gameHandler = new GameHandler();
+        this.soundPlayer = new SoundPlayer();
         this.uiUpdatesInterval = null;
 
         this.initGUI();
@@ -181,6 +184,7 @@ class IndexComponent {
     }
 
     handleClickKey(event: Event) {
+        this.soundPlayer.playSound('click');
         if (event.defaultPrevented || !this.gameHandler.active) {
             return;
         }
