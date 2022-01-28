@@ -6,7 +6,6 @@ module.exports = {
     entry: {
         'public/client': './src/ts/index.ts',
     },
-    target: 'web',
     module: {
         rules: [
             {
@@ -22,7 +21,6 @@ module.exports = {
     resolve: {
         extensions: ['.ts', '.tsx', '.js']
     },
-    externals: [nodeExternals()],
     output: {
         filename: '[name].js',
         chunkFilename: '[name].js',

@@ -10,12 +10,13 @@ class IndexComponent {
     public gameHandler: GameHandler = undefined;
     public soundPlayer: SoundPlayer = undefined;
     public uiUpdatesInterval: NodeJS.Timer | null = null;
+    public modalVisible: boolean = false;
 
     constructor() {
         this.gameHandler = new GameHandler();
         this.soundPlayer = new SoundPlayer();
         this.uiUpdatesInterval = null;
-
+        
         this.initGUI();
         this.initListeners();
     }
@@ -24,22 +25,32 @@ class IndexComponent {
         document.querySelectorAll(".keyboard-tile:not(.special)").forEach((element) => element.addEventListener('click', this.handleClickKey.bind(this)));
         document.querySelectorAll(".keyboard-tile:not(.special)").forEach((element) => element.addEventListener('click', this.handleClickKey.bind(this)));
         document.getElementById("play-again-title").addEventListener("click", this.handleClickPlayAgain.bind(this));
+        document.getElementById("modal-wrapper").addEventListener("click", this.closeModal.bind(this));
+        document.getElementById("modal-button").addEventListener("click", this.closeModal.bind(this));
 
-        window.addEventListener("keydown", function (event) {
-            if (event.defaultPrevented) {
-                return; // Do nothing if the event was already processed
-            }
+        window.addEventListener("keydown", this.handleKeyDown.bind(this), true);
 
-            const element: HTMLElement = document.querySelector(`.keyboard-tile[data-key-char="${event.key.toLowerCase()}"`);
+    }
 
-            if (element) {
-                element.click();
-            }
+    handleKeyDown(event: KeyboardEvent) {
+        if (event.defaultPrevented) {
+            return; // Do nothing if the event was already processed
+        }
 
-            // Cancel the default action to avoid it being handled twice
+        if(this.modalVisible && event.key.toLowerCase() === "enter") {
+            this.closeModal();
             event.preventDefault();
-        }, true);
+            return;
+        }
 
+        const element: HTMLElement = document.querySelector(`.keyboard-tile[data-key-char="${event.key.toLowerCase()}"`);
+
+        if (element) {
+            element.click();
+        }
+
+        // Cancel the default action to avoid it being handled twice
+        event.preventDefault();
     }
 
     initGUI() {
@@ -133,7 +144,7 @@ class IndexComponent {
                     uiUpdatesTiles.push(["tile-wrong", "with-animation-wrong"]);
                 }
             }
-            this.doUIUpdates(uiUpdatesTiles, currentTry);
+            this.doUIAndSoundUpdates(uiUpdatesTiles, currentTry);
         } else {
             this.handleError(result.error);
             return;
@@ -151,7 +162,7 @@ class IndexComponent {
     }
 
     handleClickPlayAgain(event: Event) {
-        if (event.defaultPrevented || this.gameHandler.active) {
+        if (event.defaultPrevented || this.gameHandler.active || this.modalVisible) {
             return;
         }
         this.gameHandler.init();
@@ -164,17 +175,19 @@ class IndexComponent {
     handleEndGame(win: boolean) {
         setTimeout(() => {
             if (win) {
-                alert("You win :)");
+                this.showWinModal();
+                this.soundPlayer.playSound("win");
             } else {
-                alert("You lose. :( The word was " + this.gameHandler.currentWord.join("").toUpperCase());
+                this.showLoseModal();
+                this.soundPlayer.playSound("lose");
             }
             this.gameHandler.active = false;
-            document.getElementById("play-again-title").classList.remove("none");
         }, Config.UI_UPDATE_SPEED * (Config.NUM_LETTERS + 1));
     }
 
-    handleError(error: string) {
-        alert(error);
+    handleError(message: string) {
+        this.soundPlayer.playSound("error");
+        this.showErrorModal(message);
     }
 
     getCurrentGuess() {
@@ -184,7 +197,12 @@ class IndexComponent {
     }
 
     handleClickKey(event: Event) {
+        if(this.modalVisible) {
+            return;
+        }
+
         this.soundPlayer.playSound('click');
+        
         if (event.defaultPrevented || !this.gameHandler.active) {
             return;
         }
@@ -264,11 +282,26 @@ class IndexComponent {
         return keyTile;
     }
 
-    doUIUpdates(classes: string[][], currentTry: number) {
+    doUIAndSoundUpdates(classes: string[][], currentTry: number) {
         let i = 0;
+        let matchI = 0;
         this.uiUpdatesInterval = setInterval(() => {
             const element = document.querySelector(`#letter-tile-container-${currentTry} .letter-tile[data-letter-index="${i}"]`);
             element.classList.add(...classes[i]);
+
+            switch (classes[i][0]) {
+                case "tile-match":
+                    this.soundPlayer.playSound("match" + matchI);
+                    matchI++;
+                    break;
+                case "tile-close":
+                    this.soundPlayer.playSound("close");
+                    break;
+                case "tile-wrong":
+                    this.soundPlayer.playSound("wrong");
+                    break;
+            }
+
 
             i++;
 
@@ -277,6 +310,74 @@ class IndexComponent {
                 this.uiUpdatesInterval = null;
             }
         }, Config.UI_UPDATE_SPEED);
+    }
+
+    showWinModal() {
+        const modal = document.getElementById("modal");
+        const modalWrapper = document.getElementById("modal-wrapper");
+        const modalContent = document.getElementById("modal-content");
+        modalContent.className = "";
+        modalContent.classList.add("modal-win");
+
+        const currentTry = this.gameHandler.currentTry;
+
+        const triesText = `${(currentTry + 1)} ${(currentTry === 0 ? "try" : "tries")}`
+
+        let extra = "Not too shabby!";
+
+        if(currentTry === Config.NUM_LETTERS) {
+            extra = "That was too close!"
+        } else if(currentTry === 0) {
+            extra = "Incredible!"
+        }
+        modalContent.innerHTML = `<p class="modal-title">Congratulations!</p><p class="modal-text">You won! It took you ${triesText}. ${extra}</p>`;
+
+        modalWrapper.classList.remove("hide");        
+        modal.classList.remove("hide");
+        this.modalVisible = true;
+    }
+
+    showLoseModal() {
+        const modal = document.getElementById("modal");
+        const modalWrapper = document.getElementById("modal-wrapper");
+        const modalContent = document.getElementById("modal-content");
+
+        const word = this.gameHandler.currentWord.join("").toUpperCase();
+        
+        modalContent.className = "";
+        modalContent.classList.add("modal-lose");
+        modalContent.innerHTML = `<p class="modal-title">Ouch.</p><p class="modal-text">You ran out of guesses. The word was <b>${word}!</b> Better luck next time!</p>`;
+
+        modal.classList.remove("hide");
+        modalWrapper.classList.remove("hide");
+        this.modalVisible = true;
+    }
+
+    showErrorModal(message: string) {
+        const modal = document.getElementById("modal");
+        const modalWrapper = document.getElementById("modal-wrapper");
+        const modalContent = document.getElementById("modal-content");
+
+        modalContent.className = "";
+        modalContent.classList.add("modal-error");
+        modalContent.innerHTML = `<p class="modal-title">Error!</p><p class="modal-text">${message}</p>`;
+
+        modal.classList.remove("hide");        
+        modalWrapper.classList.remove("hide");
+        this.modalVisible = true;
+    }
+
+    closeModal() {
+        const modal = document.getElementById("modal");
+        const modalWrapper = document.getElementById("modal-wrapper");
+
+        modal.classList.add("hide");
+        modalWrapper.classList.add("hide");
+        this.modalVisible = false;
+
+        if(!this.gameHandler.active) {
+            document.getElementById("play-again-title").classList.remove("none");
+        }
     }
 }
 

@@ -48,8 +48,8 @@ body {
 .letter-tile {
   background-color: var(--dark-1);
   border: 2px solid var(--dark-2);
-  height: 128px;
-  width: 128px;
+  height: 116px;
+  width: 116px;
   max-width: 100%;
   margin: 4px;
   display: flex;
@@ -178,19 +178,21 @@ body {
   transition: 0.5s all ease;
   flex-grow: 1;
   display: unset;
+  transform: scale(1);
 }
 
 #play-again-title.none {
-  display: none;
+  transform: scale(0);
   transition: 0.5s all ease;
+  height: 0;
 }
 
-#play-again-title:hover {
+#play-again-title:hover:not(.none) {
   transition: 0.5s all ease;
   transform: scale(1.25) rotate(-3deg);
 }
 
-#play-again-title:active {
+#play-again-title:active:not(.none) {
   transition: 0.5s all ease;
   transform: scale(1.35) rotate(-5deg);
   color: var(--grey-2);
@@ -201,4 +203,95 @@ body {
     font-size: 32pt;
     margin: 4px 0 0 0;
   }
+}
+
+#modal-wrapper {
+  background-color: var(--dark-0);
+  position: absolute;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  opacity: 0.7;
+  overflow: auto;
+  transition: all 0.5s;
+}
+
+#modal-wrapper.hide {
+  opacity: 0;
+  transition: all 0.5s;
+  pointer-events: none;
+}
+
+#modal {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: auto;
+  left: 0;
+  top: 0;
+  z-index: 2;
+}
+
+#modal-box {
+  position: relative;
+  width: 700px;
+  max-width: 100%;
+  transition: all 0.5s;
+  color: var(--light-0);
+  margin: auto;
+  box-shadow: 5px 5px 4px 6px var(--dark-1);
+  transform: rotate3d(0, 0, 0, 0deg);
+}
+
+#modal.hide {
+  pointer-events: none;
+}
+
+#modal.hide > #modal-box {
+  transform: rotate3d(1, 0, 0, 90deg);
+  transition: all 0.5s;
+}
+
+#modal-content {
+  opacity: 1;
+  font-size: 24pt;
+  font-weight: bold;
+  padding: 24px;
+  height: 250px;
+}
+
+#modal-button {
+  position: absolute;
+  left: calc(100% - 21px);
+  top: -42px;
+  font-size: 64px;
+  font-weight: bold;
+}
+
+#modal-button::before {
+  content: '×';
+}
+
+.modal-win {
+  background-color: var(--match-color);
+}
+
+.modal-lose {
+  background-color: var(--wrong-color);
+}
+
+.modal-error {
+  background-color: var(--close-color);
+}
+
+.modal-title {
+  font-size: 48pt;
+  margin-block-start: 12px;
+  margin-block-end: 12px;
 }

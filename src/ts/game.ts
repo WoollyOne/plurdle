@@ -19,7 +19,6 @@ export class GameHandler {
 
         // It's rare that this will happen but it does happen. Not super efficient. Maybe I'll fix later.
         while (!validDict.includes(this.currentWord.join(""))) {
-            console.log("Initializing... finding a new word", this.currentWord.join(""));
             this.currentWord = gameDict[NUM_WORDS * Math.random() | 0].split("");
         }
         this.currentTry = 0;
@@ -43,12 +42,9 @@ export class GameHandler {
             const currentWordCopy = currentWord.slice();
             const matchIndexes: number[] = [];
             guess.forEach((char, index) => {
-                const currentWordIndexOf = currentWordCopy.indexOf(char);
-                const doesMatch = currentWordIndexOf === index;
-
-                if (doesMatch) {
+                if (currentWordCopy[index] === char) {
                     currentWordCopy[index] = "";
-                    matchIndexes.push(currentWordIndexOf);
+                    matchIndexes.push(index);
                 }
             });
 

@@ -40,10 +40,12 @@ export class GameHandlerSpec implements TestFramework {
         let failures = 0;
         let successes = 0;
         let total = this.guessTestSet.length;
+        
+        const red = "\x1b[31m%s\x1b[0m";
+        const green = "\x1b[32m%s\x1b[0m"; //green
 
-        const header = ["Current", "Guess", "Close", "Match"];
-        const table = [];
         for(const guessTest of this.guessTestSet) {
+            let color = green;
             gameHandler.currentTry = 0;
             gameHandler.currentWord = guessTest.currentWord;
 
@@ -53,39 +55,42 @@ export class GameHandlerSpec implements TestFramework {
 
             const foundError = result.error !== undefined;
 
-            if(guessTest.expectedError === foundError) {
+            if(guessTest.expectedError && foundError) {
                 fallthrough = true;
-            } else {
+            } else if(guessTest.expectedError !== foundError){
                 fail = true;
+                color = red;
             }
 
-            if(!fallthrough && this.stringifyMap(guessTest.expectedClose) !== this.stringifyMap(result.closeMap)) {
+            if(!fallthrough && Array.from(guessTest.expectedClose.entries()).sort().toString() !== Array.from(result.closeMap.entries()).sort().toString()) {
                 fail = true;
+                color = red;
             }
 
             if(!fallthrough && guessTest.expectedMatch.join("") !== result.matchIndexes.join("")) {
                 fail = true;
+                color = red;
             }
 
             if(fail) {
-                console.error(`>>>>>>>> ERROR! Failed comparison test ${test}.`);
-                console.error(`>>>>>>>>>> Current Word:`, guessTest.currentWord.join("").toUpperCase());
-                console.error(`>>>>>>>>>> Guess Word:`, guessTest.guess.join("").toUpperCase());
-                console.error(`>>>>>>>>>> Expected CLOSE:`, Array.from(guessTest.expectedClose.entries()));
-                console.error(`>>>>>>>>>> Expected MATCH:`, guessTest.expectedMatch);
-                console.error(`>>>>>>>>>> Expected ERROR:`, guessTest.expectedError);
+                console.error(color, `>>>>>>>> ERROR! Failed comparison test ${test}.`);
+                console.error(color, `>>>>>>>>>> Current Word:`, guessTest.currentWord.join("").toUpperCase());
+                console.error(color, `>>>>>>>>>> Guess Word:`, guessTest.guess.join("").toUpperCase());
+                console.error(color, `>>>>>>>>>> Expected CLOSE:`, Array.from(guessTest.expectedClose.entries()));
+                console.error(color, `>>>>>>>>>> Expected MATCH:`, guessTest.expectedMatch);
+                console.error(color, `>>>>>>>>>> Expected ERROR:`, guessTest.expectedError);
                 console.error("------------------------------------------------------------");
-                console.error(`>>>>>>>>>> Resultant CLOSE:`, Array.from(result.closeMap?.entries()));
-                console.error(`>>>>>>>>>> Resultant MATCH:`, result.matchIndexes);
-                console.error(`>>>>>>>>>> Resultant ERROR:`, result.error ?? false);
+                console.error(color, `>>>>>>>>>> Resultant CLOSE:`, Array.from(result.closeMap?.entries()));
+                console.error(color,`>>>>>>>>>> Resultant MATCH:`, result.matchIndexes);
+                console.error(color, `>>>>>>>>>> Resultant ERROR:`, result.error ?? false);
                 console.error("============================================================");
                 failures++;
             }
             else {
-                console.log(">>>>>>>>>> PASSED: " + test);
-                console.log(`>>>>>>>>>> Current Word:`, guessTest.currentWord.join("").toUpperCase());
-                console.log(`>>>>>>>>>> Guess Word:`, guessTest.guess.join("").toUpperCase());
-                console.error(`>>>>>>>>>> Resultant Error:`, result.error ?? false);
+                console.log(color, ">>>>>>>>>> PASSED: " + test);
+                console.log(color, `>>>>>>>>>> Current Word:`, guessTest.currentWord.join("").toUpperCase());
+                console.log(color, `>>>>>>>>>> Guess Word:`, guessTest.guess.join("").toUpperCase());
+                console.error(color, `>>>>>>>>>> Resultant Error:`, result.error ?? false);
                 console.log("============================================================");
                 successes++;
             }
@@ -110,28 +115,28 @@ export class GameHandlerSpec implements TestFramework {
 
     public readonly guessTestSet: GuessTestSet[] = [
             {
-                currentWord: ["s", "p", "e", "a"," k"], 
+                currentWord: ["s", "p", "e", "a", "k"], 
                 guess:       ["s", "p", "e", "a", "k"], 
                 expectedMatch: [0,1,2,3,4],
                 expectedClose: new Map<string, number>(),
                 expectedError: false
             },
             {
-                currentWord: ["s", "p", "e", "a"," k"], 
+                currentWord: ["s", "p", "e", "a", "k"], 
                 guess:       ["s", "t", "e", "a", "k"], 
                 expectedMatch: [0,2,3,4],
                 expectedClose: new Map<string, number>(),
                 expectedError: false
             },
             {
-                currentWord: ["s", "p", "e", "a"," k"], 
+                currentWord: ["s", "p", "e", "a", "k"], 
                 guess:       ["f", "t", "e", "r", "k"], 
                 expectedMatch: [],
                 expectedClose: new Map<string, number>(),
                 expectedError: true
             },
             {
-                currentWord: ["s", "p", "e", "a"," k"], 
+                currentWord: ["s", "p", "e", "a", "k"], 
                 guess:       ["s", "e", "a", "r", "s"], 
                 expectedMatch: [0],
                 expectedClose: new Map<string, number>([["e", 1], ["a", 1]]),
@@ -141,7 +146,7 @@ export class GameHandlerSpec implements TestFramework {
                 currentWord: ["s", "p", "e", "e", "l"], 
                 guess:       ["r", "e", "s", "e", "t"], 
                 expectedMatch: [3],
-                expectedClose: new Map<string, number>([["e", 1], ["s", 1]]),
+                expectedClose: new Map<string, number>([["s", 1], ["e", 1]]),
                 expectedError: false
             },
             {
@@ -155,7 +160,7 @@ export class GameHandlerSpec implements TestFramework {
                 currentWord: ["l", "a", "t", "t", "e"], 
                 guess:       ["p", "l", "a", "n", "k"], 
                 expectedMatch: [],
-                expectedClose: new Map<string, number>([["l", 1]]),
+                expectedClose: new Map<string, number>([["l", 1], ["a", 1]]),
                 expectedError: false
             },
             {
@@ -190,7 +195,7 @@ export class GameHandlerSpec implements TestFramework {
                 currentWord: ["o", "b", "o", "e", "s"], 
                 guess:       ["t", "a", "b", "o", "o"], 
                 expectedMatch: [],
-                expectedClose: new Map<string, number>([["o", 2]]),
+                expectedClose: new Map<string, number>([["o", 2], ["b", 1]]),
                 expectedError: false
             },
             {
@@ -198,6 +203,13 @@ export class GameHandlerSpec implements TestFramework {
                 guess:       ["o", "b", "o", "e", "s"], 
                 expectedMatch: [2,4],
                 expectedClose: new Map<string, number>([["o", 1]]),
+                expectedError: false
+            },
+            {
+                currentWord: ["s", "h", "e", "e", "t"], 
+                guess:       ["p", "a", "r", "e", "s"], 
+                expectedMatch: [3],
+                expectedClose: new Map<string, number>([["e", 1], ["s", 1]]),
                 expectedError: false
             }
         ]

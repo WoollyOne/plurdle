@@ -8,6 +8,7 @@
         "module": "ES6",
         "moduleResolution": "node",
         "allowSyntheticDefaultImports": true,
+        "types": ["express", "node", "howler"]
     },
     "include": [
         "src/ts/**/*"
