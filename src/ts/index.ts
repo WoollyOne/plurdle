@@ -25,7 +25,7 @@ class IndexComponent {
         document.querySelectorAll(".keyboard-tile:not(.special)").forEach((element) => element.addEventListener('click', this.handleClickKey.bind(this)));
         document.querySelectorAll(".keyboard-tile:not(.special)").forEach((element) => element.addEventListener('click', this.handleClickKey.bind(this)));
         document.getElementById("play-again-title").addEventListener("click", this.handleClickPlayAgain.bind(this));
-        document.getElementById("modal-wrapper").addEventListener("click", this.closeModal.bind(this));
+        document.getElementById("modal").addEventListener("click", this.closeModal.bind(this));
         document.getElementById("modal-button").addEventListener("click", this.closeModal.bind(this));
 
         window.addEventListener("keydown", this.handleKeyDown.bind(this), true);
