@@ -1,7 +1,7 @@
 // Handles game logic;
 
-import { gameDict } from "./gamedict";
-import { validDict } from "./validdict";
+import { gameDict } from "./dicts/gamedict";
+import { validDict } from "./dicts/validdict";
 import { incrementSetIfNotPresent } from "./util";
 
 export class GameHandler {
