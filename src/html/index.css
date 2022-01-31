@@ -1,23 +1,23 @@
 :root {
-  --dark-0: #1c1c1c;
-  --dark-1: #2a2a2a;
-  --dark-2: #3c3c3c;
+  --dark-0: #003d4d;
+  --dark-1: #00303c;
+  --dark-2: #001c24;
   --light-0: #efefef;
   --light-1: #d3d3d3;
   --light-2: #aeaeae;
-  --grey-0: #636363;
-  --grey-1: #7b7b7b;
-  --grey-2: #989898;
+  --grey-0: #004b60;
+  --grey-1: #006480;
+  --grey-2: #00789a;
 
   --match-color: #00c839;
   --close-color: #c8c100;
-  --wrong-color: #3c3c3c;
-  --wrong-color-flash: #3c3c3c;
+  --wrong-color: var(--dark-1);
+  --wrong-color-flash: var(--light-2);
 }
 
 html,
 body {
-  background-color: var(--dark-0);
+  background-color: var(--dark-2);
   height: 100%;
   max-width: 100%;
   display: flex;
@@ -47,7 +47,7 @@ body {
 
 .letter-tile {
   background-color: var(--dark-1);
-  border: 2px solid var(--dark-2);
+  border-radius: 3px;
   height: 116px;
   width: 116px;
   max-width: 100%;
@@ -283,7 +283,7 @@ body {
 }
 
 .modal-lose {
-  background-color: var(--wrong-color);
+  background-color: var(--dark-2);
 }
 
 .modal-error {
